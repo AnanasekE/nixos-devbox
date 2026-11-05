@@ -1,0 +1,43 @@
+# nixos-devbox
+
+NixOS flake for the `devbox` VM (Proxmox VE guest). This repo is the single source of truth for the machine. Checkout path on the VM: `~/nixos-devbox`.
+
+## Layout
+- `flake.nix` — inputs (nixpkgs `nixos-26.05`, home-manager `release-26.05`), `nixosConfigurations.devbox`, shared `devShells`, project `templates`.
+- `hosts/devbox/configuration.nix` — system: packages, services, users, SSH, Docker, direnv, nix-ld.
+- `hosts/devbox/hardware.nix` — boot, disks (labels `boot`/`nixos`), QEMU guest. Change only when the VM hardware changes.
+- `home/janek.nix` — Home Manager: dotfile symlinks into `~/dotfiles`, git identity.
+- `shells.nix` — dev shells usable as `use flake ~/nixos-devbox#<name>`.
+- `templates/<name>/` — per-project flake templates (`nix flake init -t ~/nixos-devbox#<name>`). Keep package lists in sync with `shells.nix`.
+- `claude/user-CLAUDE.md` — symlinked to `~/.claude/CLAUDE.md`.
+
+## Workflow for any change
+1. Edit the Nix files. Prefer the matching NixOS module (`services.*`, `programs.*`) over adding a bare package.
+2. `git add -A` — flakes ignore untracked files.
+3. Format: `nixfmt <changed files>`.
+4. Check: `nix flake check` (fast eval errors), then `nh os build` (builds without activating; shows package diff).
+5. Apply: `nh os switch` (or `sudo nixos-rebuild switch --flake .#devbox`).
+6. Verify the change (service status, `which <tool>`, etc.).
+7. Commit with a message describing the change. Push only when asked.
+
+## Finding options and packages
+- Package exists: `nix search nixpkgs#<name>` or `nix eval nixpkgs#<pkg>.version`.
+- Option exists: `nix eval .#nixosConfigurations.devbox.options.<path>.description` or `man configuration.nix`.
+- Current value: `nix eval .#nixosConfigurations.devbox.config.<path>`.
+
+## Rollback and debugging
+- Failed switch or broken service: `sudo nixos-rebuild switch --rollback`.
+- Logs: `journalctl -u <unit> -b --no-pager | tail -100`.
+- Home Manager activation: `journalctl -u home-manager-janek -b`.
+- Generations: `nixos-rebuild list-generations`. Older ones stay in the boot menu (limit 10).
+
+## Updating
+- `nix flake update` then `nh os switch`. Report the `nvd` diff to the user. Claude Code itself updates this way.
+- Release upgrade (e.g. 26.05 → 26.11): change both input URLs in `flake.nix`, do not change `system.stateVersion` / `home.stateVersion`.
+
+## Constraints
+- Never edit `system.stateVersion` or `home.stateVersion`.
+- Never disable `services.openssh`, remove the user's authorized keys, or set `PasswordAuthentication = true` — that locks the user out of a headless VM.
+- Do not touch `hardware.nix` filesystems or bootloader without being asked.
+- Ask before: changing firewall rules, adding users, enabling services that listen on the network.
+- No secrets in this repo (it may be public). Use `sops-nix` or `agenix` if secrets are needed; ask first.

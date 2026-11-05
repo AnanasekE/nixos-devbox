@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nix flake check:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix flake metadata:*)",
+      "Bash(nix eval:*)",
+      "Bash(nix search:*)",
+      "Bash(nix build:*)",
+      "Bash(nixfmt:*)",
+      "Bash(nh os build:*)",
+      "Bash(nvd:*)",
+      "Bash(nixos-rebuild build:*)",
+      "Bash(nixos-rebuild list-generations:*)",
+      "Bash(systemctl status:*)",
+      "Bash(systemctl list-units:*)",
+      "Bash(journalctl:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)"
+    ],
+    "ask": [
+      "Bash(nh os switch:*)",
+      "Bash(nh os boot:*)",
+      "Bash(sudo nixos-rebuild:*)",
+      "Bash(nix flake update:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": [
+      "Bash(nix-env:*)",
+      "Bash(nix profile install:*)",
+      "Bash(sudo rm:*)",
+      "Bash(nix-collect-garbage -d:*)"
+    ]
+  }
+}
