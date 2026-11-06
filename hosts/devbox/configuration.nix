@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   user = "janek";
   flakeDir = "/home/${user}/nixos-devbox";
@@ -12,8 +17,14 @@ in
 
   # ---- Nix -----------------------------------------------------------------
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
-    trusted-users = [ "root" user ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    trusted-users = [
+      "root"
+      user
+    ];
     auto-optimise-store = true;
   };
   nix.gc = {
@@ -40,11 +51,14 @@ in
   users.users.${user} = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [
+      "wheel"
+      "docker"
+    ];
     openssh.authorizedKeys.keys = [
       # REPLACE: paste your public key(s), e.g. from `cat ~/.ssh/id_ed25519.pub`
       # or https://github.com/AnanasekE.keys
-"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL4FT7jj9QquUO+XMo2/lvPbeG8rlg919nGuzOHEYi2k janek@PC"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL4FT7jj9QquUO+XMo2/lvPbeG8rlg919nGuzOHEYi2k janek@PC"
     ];
   };
   # Key-only login, so sudo has no password to ask for.
@@ -78,20 +92,54 @@ in
 
   virtualisation.docker.enable = true;
 
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+  };
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+
   # ---- Packages ------------------------------------------------------------
   environment.systemPackages = with pkgs; [
     # Claude Code (updates come from `nix flake update`)
     claude-code
 
     # Core CLI
-    git gh lazygit curl wget jq yq-go tree htop btop ripgrep fd fzf
-    unzip zip file which tmux starship neovim
+    git
+    gh
+    lazygit
+    curl
+    wget
+    jq
+    yq-go
+    tree
+    htop
+    btop
+    ripgrep
+    fd
+    fzf
+    unzip
+    zip
+    file
+    which
+    tmux
+    starship
+    neovim
+    glib # gio, for neo-tree's trash support
 
     # Needed by kickstart.nvim plugins, Mason and treesitter
-    gcc gnumake tree-sitter nodejs_22 go python3 cargo
+    gcc
+    gnumake
+    tree-sitter
+    nodejs_22
+    go
+    python3
+    cargo
 
     # Nix tooling
-    nixd nixfmt nix-tree nvd
+    nixd
+    nixfmt
+    nix-tree
+    nvd
   ];
 
   # `nh os switch` = rebuild with a readable diff of what changed.

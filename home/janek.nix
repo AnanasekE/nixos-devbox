@@ -2,7 +2,12 @@
 # Dotfiles are cloned to ~/dotfiles (a normal git checkout, editable and pushable)
 # and linked into $HOME with out-of-store symlinks, so edits apply immediately
 # without a rebuild, and lazy.nvim can write lazy-lock.json.
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   home = config.home.homeDirectory;
   dotfiles = "${home}/dotfiles";
@@ -42,9 +47,8 @@ in
   programs.git = {
     enable = true;
     settings = {
-      # REPLACE with your identity
       user.name = "AnanasekE";
-      user.email = "you@example.com";
+      user.email = "jansambor@posteo.com";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
