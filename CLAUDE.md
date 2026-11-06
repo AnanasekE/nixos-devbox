@@ -6,7 +6,7 @@ NixOS flake for the `devbox` VM (Proxmox VE guest). This repo is the single sour
 - `flake.nix` — inputs (nixpkgs `nixos-26.05`, home-manager `release-26.05`, nixpkgs-unstable for `claude-code` only), `nixosConfigurations.devbox`, shared `devShells`, project `templates`.
 - `hosts/devbox/configuration.nix` — system: packages, services, users, SSH, Docker, direnv, nix-ld.
 - `hosts/devbox/hardware.nix` — boot, disks (labels `boot`/`nixos`), QEMU guest. Change only when the VM hardware changes.
-- `home/janek.nix` — Home Manager: dotfile symlinks into `~/dotfiles`, git identity.
+- `home/janek.nix` — Home Manager: dotfile symlinks into `~/dotfiles`, git identity and GitHub credentials.
 - `shells.nix` — dev shells usable as `use flake ~/nixos-devbox#<name>`.
 - `templates/<name>/` — per-project flake templates (`nix flake init -t ~/nixos-devbox#<name>`). Keep package lists in sync with `shells.nix`.
 - `claude/user-CLAUDE.md` — symlinked to `~/.claude/CLAUDE.md`.
@@ -19,6 +19,18 @@ NixOS flake for the `devbox` VM (Proxmox VE guest). This repo is the single sour
 5. Apply: `nh os switch` (or `sudo nixos-rebuild switch --flake .#devbox`).
 6. Verify the change (service status, `which <tool>`, etc.).
 7. Commit with a message describing the change. Push only when asked.
+
+## Pushing to GitHub
+- HTTPS remotes authenticate through `gh`: `programs.git.settings` sets a
+  `credential."https://github.com".helper` of `gh auth git-credential`, which answers
+  with the token `gh auth login` wrote to `~/.config/gh/hosts.yml`.
+- There is no SSH keypair on this box and no keyring, so a remote on `git@github.com:` or a
+  host other than github.com has nothing to authenticate with.
+- `could not read Username for 'https://github.com'` means the token is gone, not that the
+  password is wrong: there is no TTY to prompt on. Check `gh auth status`; the user has to
+  run `gh auth login` themselves.
+- `gh auth setup-git` cannot help here: it writes the global git config, which is a read-only
+  `/nix/store` symlink. The helper belongs in `home/janek.nix`.
 
 ## Finding options and packages
 - Package exists: `nix search nixpkgs#<name>` or `nix eval nixpkgs#<pkg>.version`.

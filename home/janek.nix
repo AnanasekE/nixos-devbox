@@ -52,6 +52,11 @@ in
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
+      # Push over HTTPS with the token `gh auth login` stored, instead of
+      # prompting for a username: this box is headless and has no git
+      # keyring, and ~/.config/git/config is a read-only store symlink, so
+      # `gh auth setup-git` cannot write the helper itself.
+      credential."https://github.com".helper = "!${pkgs.gh}/bin/gh auth git-credential";
     };
   };
 

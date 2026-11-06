@@ -10,7 +10,7 @@ A NixOS 26.05 dev VM on Proxmox VE that you reach over SSH. It has:
 flake.nix                    inputs, devbox system, shared devShells, templates
 hosts/devbox/configuration.nix   system packages and services
 hosts/devbox/hardware.nix        boot loader and disks (matches install.sh)
-home/janek.nix               Home Manager: dotfile links, git identity
+home/janek.nix               Home Manager: dotfile links, git identity, GitHub credentials
 shells.nix                   shared dev shells: go, node, python, rust, default
 templates/                   per-project flake templates
 CLAUDE.md                    instructions Claude Code follows inside this repo
