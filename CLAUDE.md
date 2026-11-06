@@ -3,7 +3,7 @@
 NixOS flake for the `devbox` VM (Proxmox VE guest). This repo is the single source of truth for the machine. Checkout path on the VM: `~/nixos-devbox`.
 
 ## Layout
-- `flake.nix` — inputs (nixpkgs `nixos-26.05`, home-manager `release-26.05`), `nixosConfigurations.devbox`, shared `devShells`, project `templates`.
+- `flake.nix` — inputs (nixpkgs `nixos-26.05`, home-manager `release-26.05`, nixpkgs-unstable for `claude-code` only), `nixosConfigurations.devbox`, shared `devShells`, project `templates`.
 - `hosts/devbox/configuration.nix` — system: packages, services, users, SSH, Docker, direnv, nix-ld.
 - `hosts/devbox/hardware.nix` — boot, disks (labels `boot`/`nixos`), QEMU guest. Change only when the VM hardware changes.
 - `home/janek.nix` — Home Manager: dotfile symlinks into `~/dotfiles`, git identity.
@@ -32,8 +32,10 @@ NixOS flake for the `devbox` VM (Proxmox VE guest). This repo is the single sour
 - Generations: `nixos-rebuild list-generations`. Older ones stay in the boot menu (limit 10).
 
 ## Updating
-- `nix flake update` then `nh os switch`. Report the `nvd` diff to the user. Claude Code itself updates this way.
-- Release upgrade (e.g. 26.05 → 26.11): change both input URLs in `flake.nix`, do not change `system.stateVersion` / `home.stateVersion`.
+- `nix flake update` then `nh os switch`. Report the `nvd` diff to the user.
+- Claude Code updates this way too, but it comes from the `nixpkgs-unstable` input, not 26.05: the stable channel lags upstream badly (2.1.223 vs 2.1.318 in Nov 2026) and the CLI version decides which models `/model` offers. `nix flake update nixpkgs-unstable` is enough for it. `claude update` never works here — the nixpkgs wrapper sets `DISABLE_AUTOUPDATER` and `/nix/store` is read-only.
+- Taking a package from unstable mixes glibc versions. The `claude-code` wrapper puts its own `alsa-lib` on `LD_LIBRARY_PATH`, every process Claude Code spawns inherits it, and a 26.05 `ffmpeg` then refuses to start (`version 'GLIBC_2.43' not found`). A dev shell that uses such tools should `unset LD_LIBRARY_PATH` in its `shellHook`.
+- Release upgrade (e.g. 26.05 → 26.11): change the `nixpkgs` and `home-manager` input URLs in `flake.nix` (leave `nixpkgs-unstable` alone), do not change `system.stateVersion` / `home.stateVersion`.
 
 ## Constraints
 - Never edit `system.stateVersion` or `home.stateVersion`.
