@@ -21,3 +21,7 @@ This machine is `devbox`, a NixOS 26.05 VM on Proxmox VE, reached over SSH. User
 - `~/dotfiles` is a git checkout of github.com/AnanasekE/dotfiles, symlinked into `$HOME` by Home Manager.
 - Edit files in `~/dotfiles` directly; changes apply without a rebuild. Commit and push from there.
 - Neovim config is the `nvim/.config/nvim` submodule (github.com/AnanasekE/kickstart.nvim).
+
+## Models
+- Plan with Opus 5.5, implement with Sonnet 5.5. Switch at the plan/build boundary: design, investigation and review on Opus; writing and editing the code on Sonnet.
+- When delegating, pass the model explicitly (`model: sonnet` on an implementation subagent) rather than letting it inherit.
