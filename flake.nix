@@ -3,21 +3,31 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # claude-code only, see the overlay below
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      # nixos-26.05 pins claude-code 2.1.223 while upstream is at 2.1.318,
+      # and the CLI version decides which models it offers. Its own
+      # instance, so it needs its own allowUnfree.
+      unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in
     {
       nixosConfigurations.devbox = nixpkgs.lib.nixosSystem {
         modules = [
           ./hosts/devbox/configuration.nix
+          { nixpkgs.overlays = [ (final: prev: { inherit (unstable) claude-code; }) ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
