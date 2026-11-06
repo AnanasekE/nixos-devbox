@@ -71,7 +71,7 @@ Claude Code itself is the nixpkgs `claude-code` package. It updates through `/up
 ## Project toolchains
 Use a flake committed to the project repo:
 ```
-cd ~/src/myapp
+cd ~/projects/myapp
 nix flake init -t ~/nixos-devbox#go     # or node, python, rust, default
 git add flake.nix .envrc && direnv allow
 ```
